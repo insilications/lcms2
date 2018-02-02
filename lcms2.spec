@@ -4,7 +4,7 @@
 #
 Name     : lcms2
 Version  : 8
-Release  : 3
+Release  : 4
 URL      : https://github.com/mm2/Little-CMS/archive/lcms2.8.tar.gz
 Source0  : https://github.com/mm2/Little-CMS/archive/lcms2.8.tar.gz
 Summary  : LCMS Color Management Library
