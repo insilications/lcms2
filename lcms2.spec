@@ -4,7 +4,7 @@
 #
 Name     : lcms2
 Version  : 2.9
-Release  : 5
+Release  : 6
 URL      : https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz
 Source0  : https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz
 Summary  : LCMS Color Management Library
@@ -57,16 +57,31 @@ lib components for the lcms2 package.
 
 %prep
 %setup -q -n Little-CMS-lcms2.9
+pushd ..
+cp -a Little-CMS-lcms2.9 buildavx2
+popd
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1517678331
+export SOURCE_DATE_EPOCH=1523120355
+export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
+export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
+export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
+export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
 %configure --disable-static
 make  %{?_smp_mflags}
 
+unset PKG_CONFIG_PATH
+pushd ../buildavx2/
+export CFLAGS="$CFLAGS -m64 -march=haswell"
+export CXXFLAGS="$CXXFLAGS -m64 -march=haswell"
+export LDFLAGS="$LDFLAGS -m64 -march=haswell"
+%configure --disable-static    --libdir=/usr/lib64/haswell --bindir=/usr/bin/haswell
+make  %{?_smp_mflags}
+popd
 %check
 export LANG=C
 export http_proxy=http://127.0.0.1:9/
@@ -75,8 +90,11 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1517678331
+export SOURCE_DATE_EPOCH=1523120355
 rm -rf %{buildroot}
+pushd ../buildavx2/
+%make_install
+popd
 %make_install
 
 %files
@@ -84,6 +102,10 @@ rm -rf %{buildroot}
 
 %files bin
 %defattr(-,root,root,-)
+/usr/bin/haswell/jpgicc
+/usr/bin/haswell/linkicc
+/usr/bin/haswell/psicc
+/usr/bin/haswell/transicc
 /usr/bin/jpgicc
 /usr/bin/linkicc
 /usr/bin/psicc
@@ -92,6 +114,7 @@ rm -rf %{buildroot}
 %files dev
 %defattr(-,root,root,-)
 /usr/include/*.h
+/usr/lib64/haswell/liblcms2.so
 /usr/lib64/liblcms2.so
 /usr/lib64/pkgconfig/lcms2.pc
 
@@ -101,5 +124,7 @@ rm -rf %{buildroot}
 
 %files lib
 %defattr(-,root,root,-)
+/usr/lib64/haswell/liblcms2.so.2
+/usr/lib64/haswell/liblcms2.so.2.0.8
 /usr/lib64/liblcms2.so.2
 /usr/lib64/liblcms2.so.2.0.8
