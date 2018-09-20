@@ -4,7 +4,7 @@
 #
 Name     : lcms2
 Version  : 2.9
-Release  : 7
+Release  : 8
 URL      : https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz
 Source0  : https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz
 Summary  : LCMS Color Management Library
@@ -12,10 +12,13 @@ Group    : Development/Tools
 License  : IJG MIT
 Requires: lcms2-bin
 Requires: lcms2-lib
-Requires: lcms2-doc
+Requires: lcms2-license
+Requires: lcms2-man
 BuildRequires : libjpeg-turbo-dev
 BuildRequires : pkgconfig(zlib)
+BuildRequires : tiff-dev
 BuildRequires : zlib-dev
+Patch1: CVE-2018-16435.patch
 
 %description
 Please see the documentation in doc folder
@@ -23,6 +26,8 @@ Please see the documentation in doc folder
 %package bin
 Summary: bin components for the lcms2 package.
 Group: Binaries
+Requires: lcms2-license = %{version}-%{release}
+Requires: lcms2-man = %{version}-%{release}
 
 %description bin
 bin components for the lcms2 package.
@@ -31,32 +36,42 @@ bin components for the lcms2 package.
 %package dev
 Summary: dev components for the lcms2 package.
 Group: Development
-Requires: lcms2-lib
-Requires: lcms2-bin
-Provides: lcms2-devel
+Requires: lcms2-lib = %{version}-%{release}
+Requires: lcms2-bin = %{version}-%{release}
+Provides: lcms2-devel = %{version}-%{release}
 
 %description dev
 dev components for the lcms2 package.
 
 
-%package doc
-Summary: doc components for the lcms2 package.
-Group: Documentation
-
-%description doc
-doc components for the lcms2 package.
-
-
 %package lib
 Summary: lib components for the lcms2 package.
 Group: Libraries
+Requires: lcms2-license = %{version}-%{release}
 
 %description lib
 lib components for the lcms2 package.
 
 
+%package license
+Summary: license components for the lcms2 package.
+Group: Default
+
+%description license
+license components for the lcms2 package.
+
+
+%package man
+Summary: man components for the lcms2 package.
+Group: Default
+
+%description man
+man components for the lcms2 package.
+
+
 %prep
 %setup -q -n Little-CMS-lcms2.9
+%patch1 -p1
 pushd ..
 cp -a Little-CMS-lcms2.9 buildavx2
 popd
@@ -66,11 +81,11 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1523120355
-export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
-export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
-export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
-export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math "
+export SOURCE_DATE_EPOCH=1537482625
+export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
+export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
+export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
+export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
 %configure --disable-static
 make  %{?_smp_mflags}
 
@@ -79,7 +94,7 @@ pushd ../buildavx2/
 export CFLAGS="$CFLAGS -m64 -march=haswell"
 export CXXFLAGS="$CXXFLAGS -m64 -march=haswell"
 export LDFLAGS="$LDFLAGS -m64 -march=haswell"
-%configure --disable-static    --libdir=/usr/lib64/haswell --bindir=/usr/bin/haswell
+%configure --disable-static
 make  %{?_smp_mflags}
 popd
 %check
@@ -88,12 +103,17 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check || :
+cd ../buildavx2;
+make VERBOSE=1 V=1 %{?_smp_mflags} check || : || :
 
 %install
-export SOURCE_DATE_EPOCH=1523120355
+export SOURCE_DATE_EPOCH=1537482625
 rm -rf %{buildroot}
+mkdir -p %{buildroot}/usr/share/doc/lcms2
+cp COPYING %{buildroot}/usr/share/doc/lcms2/COPYING
+cp utils/jpgicc/LICENSE_iccjpeg %{buildroot}/usr/share/doc/lcms2/utils_jpgicc_LICENSE_iccjpeg
 pushd ../buildavx2/
-%make_install
+%make_install_avx2
 popd
 %make_install
 
@@ -105,10 +125,12 @@ popd
 /usr/bin/haswell/jpgicc
 /usr/bin/haswell/linkicc
 /usr/bin/haswell/psicc
+/usr/bin/haswell/tificc
 /usr/bin/haswell/transicc
 /usr/bin/jpgicc
 /usr/bin/linkicc
 /usr/bin/psicc
+/usr/bin/tificc
 /usr/bin/transicc
 
 %files dev
@@ -118,13 +140,19 @@ popd
 /usr/lib64/liblcms2.so
 /usr/lib64/pkgconfig/lcms2.pc
 
-%files doc
-%defattr(-,root,root,-)
-%doc /usr/share/man/man1/*
-
 %files lib
 %defattr(-,root,root,-)
 /usr/lib64/haswell/liblcms2.so.2
 /usr/lib64/haswell/liblcms2.so.2.0.8
 /usr/lib64/liblcms2.so.2
 /usr/lib64/liblcms2.so.2.0.8
+
+%files license
+%defattr(-,root,root,-)
+/usr/share/doc/lcms2/COPYING
+/usr/share/doc/lcms2/utils_jpgicc_LICENSE_iccjpeg
+
+%files man
+%defattr(-,root,root,-)
+/usr/share/man/man1/jpgicc.1
+/usr/share/man/man1/tificc.1
