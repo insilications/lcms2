@@ -4,10 +4,10 @@
 #
 Name     : lcms2
 Version  : 2.9
-Release  : 9
+Release  : 10
 URL      : https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz
 Source0  : https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz
-Summary  : Small-footprint color management engine, version 2
+Summary  : LCMS Color Management Library
 Group    : Development/Tools
 License  : IJG MIT
 Requires: lcms2-bin = %{version}-%{release}
@@ -32,7 +32,6 @@ Please see the documentation in doc folder
 Summary: bin components for the lcms2 package.
 Group: Binaries
 Requires: lcms2-license = %{version}-%{release}
-Requires: lcms2-man = %{version}-%{release}
 
 %description bin
 bin components for the lcms2 package.
@@ -44,6 +43,7 @@ Group: Development
 Requires: lcms2-lib = %{version}-%{release}
 Requires: lcms2-bin = %{version}-%{release}
 Provides: lcms2-devel = %{version}-%{release}
+Requires: lcms2 = %{version}-%{release}
 
 %description dev
 dev components for the lcms2 package.
@@ -108,21 +108,25 @@ popd
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-export LANG=C
-export SOURCE_DATE_EPOCH=1550341950
-export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
-export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
-export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
-export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
+export LANG=C.UTF-8
+export SOURCE_DATE_EPOCH=1569529975
+export GCC_IGNORE_WERROR=1
+export AR=gcc-ar
+export RANLIB=gcc-ranlib
+export NM=gcc-nm
+export CFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
+export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
+export FFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
+export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
 %configure --disable-static
 make  %{?_smp_mflags}
 
 pushd ../build32/
 export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
-export ASFLAGS="$ASFLAGS --32"
-export CFLAGS="$CFLAGS -m32"
-export CXXFLAGS="$CXXFLAGS -m32"
-export LDFLAGS="$LDFLAGS -m32"
+export ASFLAGS="${ASFLAGS}${ASFLAGS:+ }--32"
+export CFLAGS="${CFLAGS}${CFLAGS:+ }-m32 -mstackrealign"
+export CXXFLAGS="${CXXFLAGS}${CXXFLAGS:+ }-m32 -mstackrealign"
+export LDFLAGS="${LDFLAGS}${LDFLAGS:+ }-m32 -mstackrealign"
 %configure --disable-static    --libdir=/usr/lib32 --build=i686-generic-linux-gnu --host=i686-generic-linux-gnu --target=i686-clr-linux-gnu
 make  %{?_smp_mflags}
 popd
@@ -135,7 +139,7 @@ export LDFLAGS="$LDFLAGS -m64 -march=haswell"
 make  %{?_smp_mflags}
 popd
 %check
-export LANG=C
+export LANG=C.UTF-8
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
@@ -146,7 +150,7 @@ cd ../buildavx2;
 make VERBOSE=1 V=1 %{?_smp_mflags} check || : || :
 
 %install
-export SOURCE_DATE_EPOCH=1550341950
+export SOURCE_DATE_EPOCH=1569529975
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/lcms2
 cp COPYING %{buildroot}/usr/share/package-licenses/lcms2/COPYING
@@ -183,7 +187,8 @@ popd
 
 %files dev
 %defattr(-,root,root,-)
-/usr/include/*.h
+/usr/include/lcms2.h
+/usr/include/lcms2_plugin.h
 /usr/lib64/haswell/liblcms2.so
 /usr/lib64/liblcms2.so
 /usr/lib64/pkgconfig/lcms2.pc
