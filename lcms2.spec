@@ -4,10 +4,10 @@
 #
 Name     : lcms2
 Version  : 2.9
-Release  : 10
+Release  : 11
 URL      : https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz
 Source0  : https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz
-Summary  : LCMS Color Management Library
+Summary  : Small-footprint color management engine, version 2
 Group    : Development/Tools
 License  : IJG MIT
 Requires: lcms2-bin = %{version}-%{release}
@@ -22,6 +22,7 @@ BuildRequires : glibc-libc32
 BuildRequires : libjpeg-turbo-dev
 BuildRequires : pkgconfig(zlib)
 BuildRequires : tiff-dev
+BuildRequires : util-linux
 BuildRequires : zlib-dev
 Patch1: CVE-2018-16435.patch
 
@@ -43,6 +44,7 @@ Group: Development
 Requires: lcms2-lib = %{version}-%{release}
 Requires: lcms2-bin = %{version}-%{release}
 Provides: lcms2-devel = %{version}-%{release}
+Requires: lcms2 = %{version}-%{release}
 Requires: lcms2 = %{version}-%{release}
 
 %description dev
@@ -109,15 +111,16 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1569529975
+export SOURCE_DATE_EPOCH=1572186677
+# -Werror is for werrorists
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
 export NM=gcc-nm
-export CFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
-export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
-export FFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
-export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong -mzero-caller-saved-regs=used "
+export CFLAGS="$CFLAGS -O3 -falign-functions=32 -fcf-protection=full -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong "
+export FCFLAGS="$CFLAGS -O3 -falign-functions=32 -fcf-protection=full -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong "
+export FFLAGS="$CFLAGS -O3 -falign-functions=32 -fcf-protection=full -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong "
+export CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -fcf-protection=full -ffat-lto-objects -flto=4 -fno-math-errno -fno-semantic-interposition -fno-trapping-math -fstack-protector-strong "
 %configure --disable-static
 make  %{?_smp_mflags}
 
@@ -150,11 +153,11 @@ cd ../buildavx2;
 make VERBOSE=1 V=1 %{?_smp_mflags} check || : || :
 
 %install
-export SOURCE_DATE_EPOCH=1569529975
+export SOURCE_DATE_EPOCH=1572186677
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/lcms2
-cp COPYING %{buildroot}/usr/share/package-licenses/lcms2/COPYING
-cp utils/jpgicc/LICENSE_iccjpeg %{buildroot}/usr/share/package-licenses/lcms2/utils_jpgicc_LICENSE_iccjpeg
+cp %{_builddir}/Little-CMS-lcms2.9/COPYING %{buildroot}/usr/share/package-licenses/lcms2/f595de201a37b00737678b96b4c4a10d5bc5f6d9
+cp %{_builddir}/Little-CMS-lcms2.9/utils/jpgicc/LICENSE_iccjpeg %{buildroot}/usr/share/package-licenses/lcms2/0ff27b2ad965b91dda6bd751b541edd707f56fbd
 pushd ../build32/
 %make_install32
 if [ -d  %{buildroot}/usr/lib32/pkgconfig ]
@@ -213,8 +216,8 @@ popd
 
 %files license
 %defattr(0644,root,root,0755)
-/usr/share/package-licenses/lcms2/COPYING
-/usr/share/package-licenses/lcms2/utils_jpgicc_LICENSE_iccjpeg
+/usr/share/package-licenses/lcms2/0ff27b2ad965b91dda6bd751b541edd707f56fbd
+/usr/share/package-licenses/lcms2/f595de201a37b00737678b96b4c4a10d5bc5f6d9
 
 %files man
 %defattr(0644,root,root,0755)
