@@ -4,7 +4,7 @@
 #
 Name     : lcms2
 Version  : 2.9
-Release  : 11
+Release  : 12
 URL      : https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz
 Source0  : https://github.com/mm2/Little-CMS/archive/lcms2.9.tar.gz
 Summary  : Small-footprint color management engine, version 2
