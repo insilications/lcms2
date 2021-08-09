@@ -1,1 +1,12 @@
 # This file contains recursive sources that require this package
+LibRaw-dev
+babl-dev
+gegl-dev
+gimp-dev
+lcms2-dev
+lcms2-dev32
+lcms2-staticdev
+lcms2-staticdev32
+libcdr-dev
+libplacebo-dev
+libplacebo-staticdev
